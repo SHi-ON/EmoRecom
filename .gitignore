@@ -441,3 +441,9 @@ fabric.properties
 .venv/
 
 # End of https://www.gitignore.io/api/flask,python,android,pycharm,java-web,intellij,jetbrains
+
+.idea
+/fer_engine/csv_to_images.py
+/fer_engine/image_classifier.py
+/fer_engine/test/
+/fer_engine/test_output/
