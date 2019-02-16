@@ -3,20 +3,20 @@ function updateMap(cur_usr_loc_lat, cur_usr_loc_lng, jsonArr ) {
 
 	// var testJsonArr = jsonArr;
     var testJsonArr = [ {
-        "locationName" : "Sai\'s Pool Emporium",
-        "address" : "21 Eagan Ave",
-        "lat" : 42.7409,
-        "long" : -73.7483
+        "locationName" : "Aroma Joe’s",
+        "address" : "72 Main St, Durham, NH 03824",
+        "lat" : 43.135446,
+        "long" : -70.92806
         }, {
-        "locationName" : "Jacks Oyster",
-        "address" : "University of San Francisco, university,",
-        "lat" : 37.7793,
-        "long" : -122.451
+        "locationName" : "Durham House of Pizza",
+        "address" : "40 Main St, Durham, NH 03824,",
+        "lat" : 43.13421,
+        "long" : -70.92554
         }, {
-        "locationName" : "Pool Palace",
-        "address" : "Utah Lake, water",
-        "lat" : 40.1851,
-        "long" : -111.81
+        "locationName" : "University of New Hampshire InterOperability Laboratory",
+        "address" : "21 Madbury Rd #100, Durham, NH 03824",
+        "lat" : 43.13613,
+        "long" : -70.92556
         } ];
     
     var markers = [];
@@ -82,8 +82,8 @@ function updateMap(cur_usr_loc_lat, cur_usr_loc_lng, jsonArr ) {
             marker1 = createMarker({
                 position: new google.maps.LatLng(lat, lon),
                 map: map,
-                icon: icon,
-            }, "<h1>Your Address</h1>");
+                //icon: icon,
+            }, "<h1>Your Location</h1>");
         }
 
         markers.push(marker1);
