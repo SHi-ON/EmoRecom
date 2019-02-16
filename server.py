@@ -8,6 +8,7 @@ app = Flask(__name__)
 @app.route('/index')
 def index():
     user = {'username': 'Chao'}
+    emotion = {'emo': 'Happy'}
     posts = [
         {
             'author': {'username': 'Monkie'},
@@ -18,7 +19,7 @@ def index():
             'body': 'The Avengers movie was so cool!'
         }
     ]
-    return render_template('index.html', title='Home', user=user, posts=posts)
+    return render_template('index.html', title='Home', user=user, posts=posts, emotion=emotion)
 
 
 @app.route('/my-link/')
