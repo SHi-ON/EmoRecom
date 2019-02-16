@@ -1,0 +1,31 @@
+
+<html>
+        <head>
+            {% if title %}
+            <title>{{ title }} - Microblog</title>
+            {% else %}
+            <title>Welcome to Microblog</title>
+            {% endif %}
+        </head>
+        <body>
+            <h1>Hi, {{ user.username }}!</h1>
+            {% for post in posts %}
+            <div><p>{{ post.author.username }} says: <b>{{ post.body }}</b></p></div>
+            {% endfor %}
+
+            <a href="/my-link/">Click me</a>
+            
+            <div id="googleMap" style="width:100%;height:400px;"></div>
+
+            <script src="{{ url_for('static', filename = 'map.js') }}"></script>
+
+            <script> setTimeout(function () {
+                    getUserLocation();
+                }, 1000);  </script>
+        
+            <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtTESyXpOa9WuicoLMGWpWkebGbIIBFfs&callback=myMap"></script>
+
+            <button type="button" onclick="getUserLocation(this)" name="enable">Enable</button>
+
+        </body>
+    </html>
