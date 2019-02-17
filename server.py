@@ -16,7 +16,7 @@ import requests
 import datetime
 import imutils
 import cv2
-import json
+# import hack2019
 
 
 
@@ -26,6 +26,7 @@ APIKEY = "AIzaSyAYkThdY9kCPUIEyOMsus2TINTn6mT2ROg"
 google_places = GooglePlaces(APIKEY)
 lock = Lock()
 lock1 = Lock()
+
 
 
 
@@ -58,13 +59,15 @@ scoreboardframe = ""
 scorerun = True
 Lat_LNG = ""
 places = []
-large = ""
+large = "happy"
 finalLarge = ""
+finalList = []
 
 
 def gen():
     global scoreboardframe
     global scorerun
+    global large
     while True:
         frame = camera1.read()[1]
         # reading the frame
@@ -131,7 +134,8 @@ def gen():
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + tt + b'\r\n\r\n')
 
-    
+
+   
 
 def gen1():
     while scorerun:
@@ -162,7 +166,9 @@ def video_feed1():
 
 @app.route('/map')
 def map():
-    return render_template('map.html', title='Home', user=user, posts=posts, emotion=finalLarge )
+    thread1 = threading.Thread(target=findSuggestion)
+    thread1.start()
+    return render_template('map.html', title='Home', user=user, posts=posts, emotion=emotion )
 
 @app.route('/camera') 
 def camera():
@@ -209,7 +215,7 @@ def locationURL(field1):
         photo = places[index].photos[0]
         photo.get(maxheight=500, maxwidth=500)
         return photo.url
-    print "ERROR URL"
+    print ("ERROR URL")
     return ""
 
 @app.route('/my-link/')
@@ -219,11 +225,38 @@ def my_link():
 
 @app.route('/getMAP', methods = ['GET'])
 def getMAP():
-    l = []
-    for place in places:
-        l.append(makeMapArg(place.name,place.formatted_address,place.lat_lng['lat'],place.lat_lng['lng']))
-    print json.dumps(l)
+    print(finalList)
     return json.dumps(l)
+
+def findSuggestion():
+    global finalList
+    finalList = makeSuggestList(large)
+
+def makeSuggestList(em):
+    aa = {}
+    aa['sad']= "bar"
+    aa['disgust']= "bar"
+    aa['scared']= "gym"
+    aa['neutral']= "restaurant"
+    aa['happy']= "gym"
+    aa['angry']= "cinema"
+    aa['surprised']= "store"
+    find = aa[em]
+    if(not find):
+        find = 'gym'
+
+    query_result = google_places.nearby_search(
+         lat_lng = Lat_LNG,radius=10000,keyword = str(find))
+    l = []
+    print (find,len(query_result.places),Lat_LNG)
+    try:
+        for place in query_result.places:
+            place.get_details()
+            l.append(makeMapArg((place.name,place.formatted_address,place.geo_location['lat'],place.geo_location['lng'])))
+    except Exception as e: 
+        print(e)
+    return l
+    
 
 def findPlace(Lat_LNG, RADIUS=50):
     # Lat_LNG=MakeLatLNG((43.1351,-70.9293))
@@ -234,8 +267,8 @@ def findPlace(Lat_LNG, RADIUS=50):
         for place in query_result.places:
             place.get_details()
             places.append(place)
-    except expression as identifier:
-        print identifier
+    except Exception as e: 
+        print(e)
     
         # print place.name
         # print place.place_id
@@ -264,6 +297,7 @@ def findLocation():
     global Lat_LNG
     temp = subprocess.Popen(["./whereami", ""], stdout=subprocess.PIPE).communicate()[0].split()
     Lat_LNG = MakeLatLNG((temp[1],temp[3]))
+    print (Lat_LNG)
     findPlace(Lat_LNG)
 
 

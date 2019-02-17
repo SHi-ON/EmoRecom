@@ -9,7 +9,7 @@ import operator
 import pandas as pd
 from pandas import DataFrame as DF
 import json
-import urllib.request
+import urllib2
 import numpy.random as rand
 import numpy as np
 
@@ -37,7 +37,7 @@ def runsuggest(emotion,Lat_LNG):
     
     google_nearby_Search = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?"
     location = str(Lat_LNG['lat'])+",%20"+str(Lat_LNG['lng'])
-    location="43.1361950,%20-70.9267410"
+    # location="43.1361950,%20-70.9267410"
     radius="10000"
     
     try:
