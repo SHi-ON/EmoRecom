@@ -42,11 +42,9 @@ posts = [
 
 scoreboardframe = ""
 scorerun = True
-
+large = ""
 
 def gen():
-    global scoreboardframe
-    global scorerun
     while True:
         frame = camera1.read()[1]
         # reading the frame
@@ -73,12 +71,17 @@ def gen():
             preds = emotion_classifier.predict(roi)[0]
             emotion_probability = np.max(preds)
             label = EMOTIONS[preds.argmax()]
-
+            score = 0
             for (i, (emotion, prob)) in enumerate(zip(EMOTIONS, preds)):
                 # construct the label text
                 text = "{}: {:.2f}%".format(emotion, prob * 100)
                 # probability of classes of emotion
+                
                 w = int(prob * 300)
+                if w > score:
+                    score = w
+                    large = emotion
+
                 cv2.rectangle(scoreboard, (7, (i * 35) + 5),
                                 (w, (i * 35) + 35), (0, 0, 255), -1)
                 cv2.putText(scoreboard, text, (10, (i * 35) + 23),
@@ -95,7 +98,7 @@ def gen():
             break
         tt = cv2.imencode('.jpg', camera_frame)[1].tobytes()
 
-
+        # tt = cv2.imencode('.jpg', frame)[1].tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + tt + b'\r\n\r\n')
 
