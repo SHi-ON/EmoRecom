@@ -8,11 +8,11 @@ import cv2
 from keras.models import load_model
 import numpy as np
 
-from recom import *
+import recom
 
 # parameters for loading data and images
-detection_model_path = 'models/haarcascade_frontalface_default.xml'
-emotion_model_path = 'models/_mini_XCEPTION.106-0.65.hdf5'
+detection_model_path = 'models/face_hyperparams.xml'
+emotion_model_path = 'models/Xception_mini106.hdf5'
 
 # hyper-parameters for bounding boxes shape
 # loading models
@@ -71,6 +71,7 @@ def gen():
 
             for (i, (emotion, prob)) in enumerate(zip(EMOTIONS, preds)):
                 last_emo = emotion
+                recom.recom_storage(last_emo)
                 # construct the label text
                 text = "{}: {:.2f}%".format(emotion, prob * 100)
                 # probability of classes of emotion
@@ -93,8 +94,6 @@ def gen():
 
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + tt  + b'\r\n\r\n')
-
-    final_emotion(last_emo)
 
     camera.release()
     cv2.destroyAllWindows()
