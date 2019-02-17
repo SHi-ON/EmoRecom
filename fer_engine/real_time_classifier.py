@@ -61,7 +61,7 @@ while True:
                         cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
 
     cv2.imshow('Face Cam', camera_frame)
-    cv2.imshow("Likelihoods", scoreboard)
+    # cv2.imshow("Likelihoods", scoreboard)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
