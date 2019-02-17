@@ -25,9 +25,10 @@ while True:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_detection.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30),
                                             flags=cv2.CASCADE_SCALE_IMAGE)
-
-    canvas = np.zeros((250, 300, 3), dtype="uint8")
-    frameClone = frame.copy()
+    # emotion classification result screen
+    scoreboard = np.zeros((250, 300, 3), dtype="uint8")
+    # camera frame
+    camera_frame = frame.copy()
     if len(faces) > 0:
         faces = sorted(faces, reverse=True,
                        key=lambda x: (x[2] - x[0]) * (x[3] - x[1]))[0]
@@ -47,19 +48,20 @@ while True:
         for (i, (emotion, prob)) in enumerate(zip(EMOTIONS, preds)):
             # construct the label text
             text = "{}: {:.2f}%".format(emotion, prob * 100)
+            # probability of classes of emotion
             w = int(prob * 300)
-            cv2.rectangle(canvas, (7, (i * 35) + 5),
+            cv2.rectangle(scoreboard, (7, (i * 35) + 5),
                           (w, (i * 35) + 35), (0, 0, 255), -1)
-            cv2.putText(canvas, text, (10, (i * 35) + 23),
+            cv2.putText(scoreboard, text, (10, (i * 35) + 23),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.45,
                         (255, 255, 255), 2)
-            cv2.putText(frameClone, label, (fX, fY - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
-            cv2.rectangle(frameClone, (fX, fY), (fX + fW, fY + fH),
+            cv2.rectangle(camera_frame, (fX, fY), (fX + fW, fY + fH),
                           (0, 0, 255), 2)
+            cv2.putText(camera_frame, label, (fX, fY - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
 
-    cv2.imshow('your_face', frameClone)
-    cv2.imshow("Probabilities", canvas)
+    cv2.imshow('Face Cam', camera_frame)
+    cv2.imshow("Likelihoods", scoreboard)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
