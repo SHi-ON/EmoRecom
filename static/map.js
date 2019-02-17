@@ -123,23 +123,6 @@ function getUserLocation() {
         navigator.geolocation.getCurrentPosition(function (position) {
             var lat = position.coords.latitude;
             var lng = position.coords.longitude;
-            // alert('Your current location is: ' + lat + ' ' + lng);
-            var client = new HttpClient();
-            alert('hi');
-            $(function () {
-                sayHi();
-                function sayHi() {
-                    $.ajax({
-                        type: "GET",
-                        url: "getMap",
-                        success: function (data) {
-                            alert(data);
-                            updateMap(lat, lng, "data");
-                        },
-                    });
-                }
-            });
-
         }, function () {
 
         });
