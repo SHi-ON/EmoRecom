@@ -1,0 +1,38 @@
+
+
+
+<html>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Montserrat">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif; color:white; background-color: black;text-align: center;}
+        .w3-row-padding img {margin-bottom: 12px}
+        .bgimg {
+          background-position: center;
+          background-repeat: no-repeat;
+          background-size: cover;
+          min-height: 100%;
+        }
+
+        .centera {
+            display: inline-block;
+            height: 50%;
+            width:30%;
+            margin: 0 auto;
+        }
+    </style>
+
+    <body>
+        <h1>BackEnd Facial Recognition</h1>
+        <div class='parent'>
+            <img class=centera src="{{ url_for('video_feed1')}}"> 
+        </div>
+    </body>
+</html>

@@ -1,22 +1,32 @@
 #!/usr/bin/python3
 # -*- coding: utf8 -*-
 
-from flask import *
+
 from keras.preprocessing.image import img_to_array
+from googleplaces import GooglePlaces, types, lang
+from keras.models import load_model
+from random import randint
+from threading import Lock
+from flask import *
+import numpy as np
+import subprocess
+import googlemaps
+import threading
+import requests
+import datetime
 import imutils
 import cv2
-from threading import Lock
-from keras.models import load_model
-import numpy as np
-from random import randint
-import datetime
-
-lock = Lock()
 
 
-# parameters for loading data and images
+
 detection_model_path = 'models/haarcascade_frontalface_default.xml'
 emotion_model_path = 'models/_mini_XCEPTION.106-0.65.hdf5'
+APIKEY = "AIzaSyAYkThdY9kCPUIEyOMsus2TINTn6mT2ROg"
+google_places = GooglePlaces(APIKEY)
+lock = Lock()
+lock1 = Lock()
+
+
 
 # hyper-parameters for bounding boxes shape
 # loading models
@@ -45,9 +55,14 @@ posts = [
 
 scoreboardframe = ""
 scorerun = True
+Lat_LNG = ""
+places = []
 large = ""
 
+
 def gen():
+    global scoreboardframe
+    global scorerun
     while True:
         frame = camera1.read()[1]
         # reading the frame
@@ -105,6 +120,11 @@ def gen():
             break
         tt = cv2.imencode('.jpg', camera_frame)[1].tobytes()
 
+        lock1.acquire()
+        scoreboardframe = cv2.imencode('.jpg', scoreboard)[1].tobytes()
+        scorerun = False
+        lock1.release()
+
         # tt = cv2.imencode('.jpg', frame)[1].tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + tt + b'\r\n\r\n')
@@ -112,6 +132,15 @@ def gen():
     camera.release()
     cv2.destroyAllWindows()
 
+def gen1():
+    while scorerun:
+        pass
+    while True:
+        lock1.acquire()
+        tt = scoreboardframe
+        lock1.release()
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + tt + b'\r\n\r\n')
 
 
 @app.route('/')
@@ -124,14 +153,31 @@ def video_feed():
     return Response(gen(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/video_feed1')
+def video_feed1():
+    return Response(gen1(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
 @app.route('/camera') 
 def camera():
     return render_template('camera.html', title='Home', user=user, posts=posts, emotion=emotion)
+
+@app.route('/backend') 
+def backend():
+    return render_template('backend.html', title='Home', user=user, posts=posts, emotion=emotion)
 
 
 @app.route('/index') 
 def index():
     return render_template('index.html', title='Home', user=user, posts=posts, emotion=emotion)
+
+@app.route('/Location1') 
+def Location1():
+    return render_template('Location1.html', title='Home')
+
+@app.route('/Location2') 
+def Location2():
+    return render_template('Location2.html', title='Home')
 
 
 @app.route('/message', methods = ['GET'])
@@ -142,36 +188,65 @@ def message():
     message = 'You look ' + em
     return message
 
-# last_i = -1
-# @app.route('/message', methods = ['GET'])
-# def message():
-#     global last_i
-#     print ("DDDDDDD")
-#     message = 'Hi ' + user['username'] + '!'
-#     i = randint(0, 4)
-#     while (i == last_i):
-#         i = randint(0, 4)
-#     last_i = i
-#     if i == 1:
-#         message = 'You look ' + emotion['emo']
-#     if i == 2:
-#         currentDT = datetime.datetime.now()
-#         message = 'It is now ' + currentDT.strftime("%I:%M:%S %p")
-#     if i == 3:
-#         message = 'Chao you are so handsome!'
-#     return message
+@app.route('/locationNAME/<field1>', methods = ['GET'])
+def locationNAME(field1):
+    index = int(field1)
+    if len(places) > 0:
+        return places[index].name
+    print "ERROR URL"
+    return ""
 
 
-
-
+@app.route('/locationURL/<field1>', methods = ['GET'])
+def locationURL(field1):
+    index = int(field1)
+    if len(places) > 0 and len(places[index].photos) > 0:
+        photo = places[index].photos[0]
+        photo.get(maxheight=500, maxwidth=500)
+        return photo.url
+    print "ERROR URL"
+    return ""
 
 @app.route('/my-link/')
 def my_link():
   print('I got clicked!')
   return 'Click.'
 
+def findPlace(Lat_LNG, RADIUS=50):
+    # Lat_LNG=MakeLatLNG((43.1351,-70.9293))
+    query_result = google_places.nearby_search(
+         lat_lng = Lat_LNG,radius=RADIUS)
 
+    try:
+        for place in query_result.places:
+            place.get_details()
+            places.append(place)
+    except expression as identifier:
+        print identifier
+    
+        # print place.name
+        # print place.place_id
+        # print place.types[0]
+        # print place.rating
+        # print place.geo_location
+        # if len(place.photos) > 0:
+        #     photo = place.photos[0]
+        #     photo.get(maxheight=500, maxwidth=500)
+        #     print photo.url
+
+def MakeLatLNG(LOCATION):
+    return {"lat" : LOCATION[0],"lng" : LOCATION[1]}
+
+
+def findLocation():
+    global Lat_LNG
+    temp = subprocess.Popen(["./whereami", ""], stdout=subprocess.PIPE).communicate()[0].split()
+    Lat_LNG = MakeLatLNG((temp[1],temp[3]))
+    findPlace(Lat_LNG)
 
 
 if __name__ == '__main__':
-  app.run(debug=True)
+    thread1 = threading.Thread(target=findLocation)
+    thread1.start()
+    app.run(debug=True)
+    thread1.join()
