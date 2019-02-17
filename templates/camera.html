@@ -52,17 +52,15 @@
             <script>
                 $(function () {
                     sayHi();
-                  
-        
                     function sayHi() {
-                        setTimeout(sayHi, 4000);
+                        setTimeout(sayHi, 400);
                         $.ajax({
                             type: "GET",
                             url: "message",
                             success: function (data) {
                                 $('.text').text(data);
                                 $("#div2").fadeIn(1000);
-                                $("#div2").delay(2000).fadeOut(1000);
+                                // $("#div2").delay(2000).fadeOut(1000);
         
                             },
                         });
