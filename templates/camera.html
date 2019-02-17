@@ -23,19 +23,31 @@
     
             .centera {
                 display: inline-block;
-                border-radius: 50%;
-                height: 50%;
-                width:30%;
-                margin: 0 auto;
+                /*border-radius: 50%;
+                height: 70%;
+                width:50%;
+                margin: 0 auto;*/
+                width: 500px;
+    height: 500px;
+    -moz-border-radius: 50%; 
+    -webkit-border-radius: 50%; 
+    border-radius: 50%;
             }
             .centerb{
                 display: inline-block;
             }
+            .centerc {
+                display: inline-block;
+                height: 65px;
+                width: 65px;
+                
+            }
         </style>
     
         <body>
-    
-            <h1>emo.</h1>
+            <div class='parent'>
+                <h1 class=centerb>emo</h1><img class=centerc src="static/faceinverse.png"> 
+            </div>
           
             <div class='parent'>
                 <img class=centera src="{{ url_for('video_feed')}}"> 
@@ -49,6 +61,7 @@
 
 
             <h1 class="center" id="div2"><p class="text">Message</p></h1>
+
             <script>
                 $(function () {
                     sayHi();
