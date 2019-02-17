@@ -16,6 +16,7 @@ import requests
 import datetime
 import imutils
 import cv2
+import json
 
 
 
@@ -58,6 +59,7 @@ scorerun = True
 Lat_LNG = ""
 places = []
 large = ""
+finalLarge = ""
 
 
 def gen():
@@ -129,8 +131,7 @@ def gen():
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + tt + b'\r\n\r\n')
 
-    camera.release()
-    cv2.destroyAllWindows()
+    
 
 def gen1():
     while scorerun:
@@ -148,6 +149,7 @@ def gen1():
 def stanford_page():
     return render_template('start.html', user=user)
 
+
 @app.route('/video_feed')
 def video_feed():
     return Response(gen(),
@@ -157,6 +159,10 @@ def video_feed():
 def video_feed1():
     return Response(gen1(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/map')
+def map():
+    return render_template('map.html', title='Home', user=user, posts=posts, emotion=finalLarge )
 
 @app.route('/camera') 
 def camera():
@@ -185,15 +191,14 @@ def message():
     lock.acquire()
     em = emotion['emo']
     lock.release()
-    message = 'You look ' + em
-    return message
+    return em
 
 @app.route('/locationNAME/<field1>', methods = ['GET'])
 def locationNAME(field1):
     index = int(field1)
     if len(places) > 0:
         return places[index].name
-    print "ERROR URL"
+    print ("ERROR URL")
     return ""
 
 
@@ -211,6 +216,14 @@ def locationURL(field1):
 def my_link():
   print('I got clicked!')
   return 'Click.'
+
+@app.route('/getMAP', methods = ['GET'])
+def getMAP():
+    l = []
+    for place in places:
+        l.append(makeMapArg(place.name,place.formatted_address,place.lat_lng['lat'],place.lat_lng['lng']))
+    print json.dumps(l)
+    return json.dumps(l)
 
 def findPlace(Lat_LNG, RADIUS=50):
     # Lat_LNG=MakeLatLNG((43.1351,-70.9293))
@@ -233,6 +246,15 @@ def findPlace(Lat_LNG, RADIUS=50):
         #     photo = place.photos[0]
         #     photo.get(maxheight=500, maxwidth=500)
         #     print photo.url
+def makeMapArg(mapARG):
+    return { "locationName" : mapARG[0],
+      "address" : mapARG[1],
+      "lat" : mapARG[2],
+      "long" : mapARG[3]
+    }
+
+
+
 
 def MakeLatLNG(LOCATION):
     return {"lat" : LOCATION[0],"lng" : LOCATION[1]}
@@ -250,3 +272,5 @@ if __name__ == '__main__':
     thread1.start()
     app.run(debug=True)
     thread1.join()
+    camera1.release()
+    cv2.destroyAllWindows()
