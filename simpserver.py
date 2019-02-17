@@ -66,6 +66,10 @@ def message():
         message = 'Chao you are so handsome!'
     return message
 
+@app.route('/map') 
+def map():
+    return render_template('map.html', title='Home', user=user, posts=posts, emotion=emotion)
+
 
 
 if __name__ == '__main__':
