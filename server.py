@@ -5,6 +5,7 @@ from flask import Flask, render_template, Response
 from keras.preprocessing.image import img_to_array
 import imutils
 import cv2
+from threading import Lock
 from keras.models import load_model
 import numpy as np
 
@@ -39,8 +40,13 @@ posts = [
     }
 ]
 
+scoreboardframe = ""
+scorerun = True
+
 
 def gen():
+    global scoreboardframe
+    global scorerun
     while True:
         frame = camera1.read()[1]
         # reading the frame
@@ -90,10 +96,12 @@ def gen():
         tt = cv2.imencode('.jpg', camera_frame)[1].tobytes()
 
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + tt  + b'\r\n\r\n')
+               b'Content-Type: image/jpeg\r\n\r\n' + tt + b'\r\n\r\n')
 
     camera.release()
     cv2.destroyAllWindows()
+
+
 
 @app.route('/')
 @app.route('/start')
@@ -116,17 +124,10 @@ def index():
 
 
 
-
-
-
 @app.route('/my-link/')
 def my_link():
   print('I got clicked!')
-
   return 'Click.'
-
-
-
 
 if __name__ == '__main__':
   app.run(debug=True)

@@ -22,11 +22,14 @@
         }
 
         .centera {
-            display: block;
+            display: inline-block;
             border-radius: 50%;
             height: 50%;
             width:30%;
             margin: 0 auto;
+        }
+        .centerb{
+            display: inline-block;
         }
     </style>
 
@@ -34,7 +37,11 @@
 
         <h1>EmoRecom</h1>
         <h1>Hi, {{ user.username }}!</h1>
-        <img class=centera src="{{ url_for('video_feed')}}">
+        <div class='parent'>
+            <img class=centera src="{{ url_for('video_feed')}}"> 
+        </div>
+        
+        
         <h3> You look {{emotion.emo}} </h3>
         
     </body>
