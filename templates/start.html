@@ -1,0 +1,92 @@
+
+<html>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Montserrat">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif;
+         color: white;}
+
+        body {
+            background-color: black;
+        }
+
+        .w3-row-padding img {margin-bottom: 12px}
+
+        .bgimg {
+          background-position: center;
+          background-repeat: no-repeat;
+          background-size: cover;
+          min-height: 100%;
+        }
+        /* ============================================================= */
+        .center{
+            text-align: center;
+        }
+
+        .face {
+            /* display: block;
+            background: white;
+            border-radius: 50%;
+            height: 300px;
+            width: 300px;
+            margin: 0; */
+            display: block;
+            background: white;
+            border-radius: 50%;
+            height: 300px;
+            width: 300px;
+            margin: 100 auto;
+            /* animation: rotate 2s infinite linear;  */
+            
+        }
+        @keyframes rotate{
+        0%{ transform: rotate(0deg); }
+        100%{ transform: rotate(360deg); }  
+        }
+
+        .hi {
+        width: 100px;
+        height: 100px;
+        background-color: red;
+        position: relative;
+        -webkit-animation-name: example; /* Safari 4.0 - 8.0 */
+        -webkit-animation-duration: 4s; /* Safari 4.0 - 8.0 */
+        animation-name: example;
+        animation-duration: 4s;
+        
+        }  
+
+        /* Safari 4.0 - 8.0 */
+        @-webkit-keyframes example {
+        0%   {background-color:red; left:0px; top:0px;}
+        25%  {background-color:yellow; left:200px; top:0px;}
+        50%  {background-color:blue; left:200px; top:200px;}
+        75%  {background-color:green; left:0px; top:200px;}
+        100% {background-color:red; left:0px; top:0px;}
+        }
+
+        /* Standard syntax */
+        @keyframes example {
+        0%   {background-color:red; left:0px; top:0px;}
+        25%  {background-color:yellow; left:200px; top:0px;}
+        50%  {background-color:blue; left:200px; top:200px;}
+        75%  {background-color:green; left:0px; top:200px;}
+        100% {background-color:red; left:0px; top:0px;}
+        }
+    </style>
+
+    <body>
+        <h1 class=center>EmoRecom</h1>
+        <a href="index">
+        <img class=face src="/static/face.png" alt="FACE"   >
+        </a>
+        <h1 class=center>Hi, {{ user.username }}!</h1>
+        
+    </body>
+</html>
