@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 from flask import Flask, render_template, Response
-from camera import Camera
+from camera import VideoCamera
 
 app = Flask(__name__)
 
@@ -25,23 +25,25 @@ def gen(camera):
     while True:
         frame = camera.get_frame()
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
 @app.route('/')
 @app.route('/start')
 def stanford_page():
     return render_template('start.html', user=user)
 
-# @app.route('/')
-# def video_feed():
-#     return Response(gen(Camera()),
-#                     mimetype='multipart/x-mixed-replace; boundary=frame')
+@app.route('/video_feed')
+def video_feed():
+    return Response(gen(VideoCamera()),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/camera') 
+def camera():
+    return render_template('camera.html', title='Home', user=user, posts=posts, emotion=emotion)
 
 
 @app.route('/index') 
-# what is this?
 def index():
-    
     return render_template('index.html', title='Home', user=user, posts=posts, emotion=emotion)
 
 
