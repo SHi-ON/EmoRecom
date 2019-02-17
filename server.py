@@ -1,18 +1,35 @@
 #!/usr/bin/python3
 # -*- coding: utf8 -*-
 
-from flask import Flask, render_template, Response
+
 from keras.preprocessing.image import img_to_array
+from googleplaces import GooglePlaces, types, lang
+from keras.models import load_model
+from random import randint
+from threading import Lock
+from flask import *
+import numpy as np
+import subprocess
+import googlemaps
+import threading
+import requests
+import datetime
 import imutils
 import cv2
-from keras.models import load_model
-import numpy as np
+# import hack2019
+
 
 import recom
 
 # parameters for loading data and images
 detection_model_path = 'models/face_hyperparams.xml'
 emotion_model_path = 'models/Xception_mini106.hdf5'
+
+APIKEY = "AIzaSyAYkThdY9kCPUIEyOMsus2TINTn6mT2ROg"
+google_places = GooglePlaces(APIKEY)
+lock = Lock()
+lock1 = Lock()
+
 
 # hyper-parameters for bounding boxes shape
 # loading models
@@ -39,9 +56,19 @@ posts = [
     }
 ]
 
+scoreboardframe = ""
+scorerun = True
+Lat_LNG = ""
+places = []
+large = "happy"
+finalLarge = ""
+finalList = []
+
 
 def gen():
-    last_emo = ''
+    global scoreboardframe
+    global scorerun
+    global large
     while True:
         frame = camera1.read()[1]
         # reading the frame
@@ -68,14 +95,25 @@ def gen():
             preds = emotion_classifier.predict(roi)[0]
             emotion_probability = np.max(preds)
             label = EMOTIONS[preds.argmax()]
+<<<<<<< HEAD
 
             for (i, (emotion, prob)) in enumerate(zip(EMOTIONS, preds)):
                 last_emo = emotion
                 recom.recom_storage(last_emo)
+=======
+            score = 0
+            for (i, (ee, prob)) in enumerate(zip(EMOTIONS, preds)):
+>>>>>>> f6840804f4660641badb8da76caec96f7070c7a6
                 # construct the label text
-                text = "{}: {:.2f}%".format(emotion, prob * 100)
+                text = "{}: {:.2f}%".format(ee, prob * 100)
                 # probability of classes of emotion
+                
                 w = int(prob * 300)
+                if w > score:
+                    score = w
+                    large = ee
+                    
+
                 cv2.rectangle(scoreboard, (7, (i * 35) + 5),
                                 (w, (i * 35) + 35), (0, 0, 255), -1)
                 cv2.putText(scoreboard, text, (10, (i * 35) + 23),
@@ -85,6 +123,9 @@ def gen():
                                 (0, 0, 255), 2)
                 cv2.putText(camera_frame, label, (fX, fY - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+            lock.acquire()
+            emotion['emo'] = str(large)
+            lock.release()
 
         # cv2.imshow('Face Cam', camera_frame)
         # cv2.imshow("Likelihoods", scoreboard)
@@ -92,44 +133,194 @@ def gen():
             break
         tt = cv2.imencode('.jpg', camera_frame)[1].tobytes()
 
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + tt  + b'\r\n\r\n')
+        lock1.acquire()
+        scoreboardframe = cv2.imencode('.jpg', scoreboard)[1].tobytes()
+        scorerun = False
+        lock1.release()
 
+        # tt = cv2.imencode('.jpg', frame)[1].tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + tt + b'\r\n\r\n')
+
+<<<<<<< HEAD
     camera.release()
     cv2.destroyAllWindows()
+=======
+
+   
+
+def gen1():
+    while scorerun:
+        pass
+    while True:
+        lock1.acquire()
+        tt = scoreboardframe
+        lock1.release()
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + tt + b'\r\n\r\n')
+
+>>>>>>> f6840804f4660641badb8da76caec96f7070c7a6
 
 @app.route('/')
 @app.route('/start')
 def stanford_page():
     return render_template('start.html', user=user)
 
+
 @app.route('/video_feed')
 def video_feed():
     return Response(gen(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/video_feed1')
+def video_feed1():
+    return Response(gen1(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/map')
+def map():
+    thread1 = threading.Thread(target=findSuggestion)
+    thread1.start()
+    return render_template('map.html', title='Home', user=user, posts=posts, emotion=emotion )
+
 @app.route('/camera') 
 def camera():
     return render_template('camera.html', title='Home', user=user, posts=posts, emotion=emotion)
+
+@app.route('/backend') 
+def backend():
+    return render_template('backend.html', title='Home', user=user, posts=posts, emotion=emotion)
 
 
 @app.route('/index') 
 def index():
     return render_template('index.html', title='Home', user=user, posts=posts, emotion=emotion)
 
+@app.route('/Location1') 
+def Location1():
+    return render_template('Location1.html', title='Home')
+
+@app.route('/Location2') 
+def Location2():
+    return render_template('Location2.html', title='Home')
 
 
+@app.route('/message', methods = ['GET'])
+def message():
+    lock.acquire()
+    em = emotion['emo']
+    lock.release()
+    return em
+
+@app.route('/locationNAME/<field1>', methods = ['GET'])
+def locationNAME(field1):
+    index = int(field1)
+    if len(places) > 0:
+        return places[index].name
+    print ("ERROR URL")
+    return ""
 
 
+@app.route('/locationURL/<field1>', methods = ['GET'])
+def locationURL(field1):
+    index = int(field1)
+    if len(places) > 0 and len(places[index].photos) > 0:
+        photo = places[index].photos[0]
+        photo.get(maxheight=500, maxwidth=500)
+        return photo.url
+    print ("ERROR URL")
+    return ""
 
 @app.route('/my-link/')
 def my_link():
   print('I got clicked!')
-
   return 'Click.'
 
+@app.route('/getMAP', methods = ['GET'])
+def getMAP():
+    while not len(finalList) > 0:
+        pass
+    print(finalList)
+    return finalList
 
+def findSuggestion():
+    global finalList
+    finalList = makeSuggestList(large)
+    # print (json.dumps(finalList))
+
+def makeSuggestList(em):
+    aa = {}
+    aa['sad']= "bar"
+    aa['disgust']= "bar"
+    aa['scared']= "gym"
+    aa['neutral']= "restaurant"
+    aa['happy']= "gym"
+    aa['angry']= "cinema"
+    aa['surprised']= "store"
+    find = aa[em]
+    if(not find):
+        find = 'gym'
+
+    query_result = google_places.nearby_search(
+         lat_lng = Lat_LNG,radius=10000,keyword = str(find))
+    l = []
+    print (find,len(query_result.places),Lat_LNG)
+    try:
+        for place in query_result.places:
+            place.get_details()
+            l.append(makeMapArg((place.name,place.formatted_address,place.geo_location['lat'],place.geo_location['lng'])))
+    except Exception as e: 
+        print(e)
+    return l
+    
+
+def findPlace(Lat_LNG, RADIUS=50):
+    # Lat_LNG=MakeLatLNG((43.1351,-70.9293))
+    query_result = google_places.nearby_search(
+         lat_lng = Lat_LNG,radius=RADIUS)
+
+    try:
+        for place in query_result.places:
+            place.get_details()
+            places.append(place)
+    except Exception as e: 
+        print(e)
+    
+        # print place.name
+        # print place.place_id
+        # print place.types[0]
+        # print place.rating
+        # print place.geo_location
+        # if len(place.photos) > 0:
+        #     photo = place.photos[0]
+        #     photo.get(maxheight=500, maxwidth=500)
+        #     print photo.url
+def makeMapArg(mapARG):
+    return { "locationName" : mapARG[0],
+      "address" : mapARG[1],
+      "lat" : mapARG[2],
+      "long" : mapARG[3]
+    }
+
+
+
+
+def MakeLatLNG(LOCATION):
+    return {"lat" : LOCATION[0],"lng" : LOCATION[1]}
+
+
+def findLocation():
+    global Lat_LNG
+    temp = subprocess.Popen(["./whereami", ""], stdout=subprocess.PIPE).communicate()[0].split()
+    Lat_LNG = MakeLatLNG((temp[1],temp[3]))
+    print (Lat_LNG)
+    findPlace(Lat_LNG)
 
 
 if __name__ == '__main__':
-  app.run(debug=True)
+    thread1 = threading.Thread(target=findLocation)
+    thread1.start()
+    app.run(debug=True)
+    thread1.join()
+    camera1.release()
+    cv2.destroyAllWindows()

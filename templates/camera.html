@@ -10,32 +10,93 @@
         href="https://fonts.googleapis.com/css?family=Montserrat">
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
     <style>
-        body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif; color:white; background-color: black;text-align: center;}
-        .w3-row-padding img {margin-bottom: 12px}
-        .bgimg {
-          background-position: center;
-          background-repeat: no-repeat;
-          background-size: cover;
-          min-height: 100%;
-        }
+            body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif; color:white; background-color: black;text-align: center;}
+            .w3-row-padding img {margin-bottom: 12px}
+            .bgimg {
+              background-position: center;
+              background-repeat: no-repeat;
+              background-size: cover;
+              min-height: 100%;
+            }
 
-        .centera {
-            display: block;
-            border-radius: 50%;
-            height: 50%;
-            width:30%;
-            margin: 0 auto;
-        }
-    </style>
+            .face {
+            /* display: block;
+                background: white;
+                border-radius: 50%;
+                height: 300px;
+                width: 300px;
+                margin: 0; */
+                display: inline-block;
+                background: yellow;
+                border-radius: 50%;
+                height: 100px;
+                width: 100px;
+                margin: 0 auto;
+                /* animation: rotate 2s infinite linear;  */
 
+            }
+    
+            .centera {
+                display: inline-block;
+                /*border-radius: 50%;
+                height: 70%;
+                width:50%;
+                margin: 0 auto;*/
+                width: 500px;
+                height: 500px;
+                -moz-border-radius: 50%; 
+                -webkit-border-radius: 50%; 
+                border-radius: 50%;
+            }
+            .centerb{
+                display: inline-block;
+            }
+            .centerc {
+                display: inline-block;
+                height: 65px;
+                width: 65px;
+                
+            }
+        </style>
     <body>
+        <div class='parent'>
+            <h1 class=centerb>emoai</h1><img class=centerc
+                src="static/faceinverse.png">
+        </div>
 
-        <h1>EmoRecom</h1>
-        <h1>Hi, {{ user.username }}!</h1>
-        <img class=centera src="{{ url_for('video_feed')}}">
-        <h3> You look {{emotion.emo}} </h3>
+        <div class='parent'>
+            <img class=centera src="{{ url_for('video_feed')}}">
+        </div>
+
+        <a href="map">
+                <img class=face src="/static/face.png" alt="FACE">
+            </a>
         
+        <script
+            src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <h1 class="center" id="div2"><p class="text">Message</p></h1>
+        
+        <script>
+                $(function () {
+                    sayHi();
+                    function sayHi() {
+                        setTimeout(sayHi, 400);
+                        $.ajax({
+                            type: "GET",
+                            url: "message",
+                            success: function (data) {
+                                $('.text').text('You look ' + data);
+                                $("#div2").fadeIn(1000);
+                                // $("#div2").delay(2000).fadeOut(1000);
+                                
+                                $('.face').attr('src','/static/'+data+'.png');
+        
+                            },
+                        });
+                    }
+                });
+        
+            </script>
     </body>
 </html>
