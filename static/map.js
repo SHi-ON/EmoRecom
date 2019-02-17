@@ -123,9 +123,9 @@ function getUserLocation() {
         navigator.geolocation.getCurrentPosition(function (position) {
             var lat = position.coords.latitude;
             var lng = position.coords.longitude;
-            alert('Your current location is: ' + lat + ' ' + lng);
+            // alert('Your current location is: ' + lat + ' ' + lng);
             var client = new HttpClient();
-
+            alert('hi');
             $(function () {
                 sayHi();
                 function sayHi() {
@@ -133,8 +133,8 @@ function getUserLocation() {
                         type: "GET",
                         url: "getMap",
                         success: function (data) {
-                            console.log(data);
-                            updateMap(lat, lng, data);
+                            alert(data);
+                            updateMap(lat, lng, "data");
                         },
                     });
                 }

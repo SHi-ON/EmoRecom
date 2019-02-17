@@ -225,12 +225,15 @@ def my_link():
 
 @app.route('/getMAP', methods = ['GET'])
 def getMAP():
+    while not len(finalList) > 0:
+        pass
     print(finalList)
-    return json.dumps(l)
+    return finalList
 
 def findSuggestion():
     global finalList
     finalList = makeSuggestList(large)
+    # print (json.dumps(finalList))
 
 def makeSuggestList(em):
     aa = {}

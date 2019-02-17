@@ -58,6 +58,19 @@
                     <script src="{{ url_for('static', filename = 'map.js') }}"></script>
         
                     <script> setTimeout(function () {
+
+                            $(function () {
+    
+                    $.ajax({
+                        type: "GET",
+                        url: "getMap",
+                        success: function (data) {
+                            alert(data);
+                            updateMap(lat, lng, "data");
+                        },
+                    });
+      
+
                             getUserLocation();
                         }, 1000);  </script>
                 
