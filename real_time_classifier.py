@@ -7,8 +7,8 @@ import numpy as np
 
 
 # parameters for loading data and images
-detection_model_path = 'models/haarcascade_frontalface_default.xml'
-emotion_model_path = 'models/_mini_XCEPTION.106-0.65.hdf5'
+detection_model_path = 'models/face_hyperparams.xml'
+emotion_model_path = 'models/Xception_mini106.hdf5'
 
 # hyper-parameters for bounding boxes shape
 # loading models
