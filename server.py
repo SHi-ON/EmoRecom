@@ -19,15 +19,16 @@ import cv2
 # import hack2019
 
 
+import recom
 
-detection_model_path = 'models/haarcascade_frontalface_default.xml'
-emotion_model_path = 'models/_mini_XCEPTION.106-0.65.hdf5'
+# parameters for loading data and images
+detection_model_path = 'models/face_hyperparams.xml'
+emotion_model_path = 'models/Xception_mini106.hdf5'
+
 APIKEY = "AIzaSyAYkThdY9kCPUIEyOMsus2TINTn6mT2ROg"
 google_places = GooglePlaces(APIKEY)
 lock = Lock()
 lock1 = Lock()
-
-
 
 
 # hyper-parameters for bounding boxes shape
@@ -94,8 +95,15 @@ def gen():
             preds = emotion_classifier.predict(roi)[0]
             emotion_probability = np.max(preds)
             label = EMOTIONS[preds.argmax()]
+<<<<<<< HEAD
+
+            for (i, (emotion, prob)) in enumerate(zip(EMOTIONS, preds)):
+                last_emo = emotion
+                recom.recom_storage(last_emo)
+=======
             score = 0
             for (i, (ee, prob)) in enumerate(zip(EMOTIONS, preds)):
+>>>>>>> f6840804f4660641badb8da76caec96f7070c7a6
                 # construct the label text
                 text = "{}: {:.2f}%".format(ee, prob * 100)
                 # probability of classes of emotion
@@ -134,6 +142,10 @@ def gen():
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + tt + b'\r\n\r\n')
 
+<<<<<<< HEAD
+    camera.release()
+    cv2.destroyAllWindows()
+=======
 
    
 
@@ -147,6 +159,7 @@ def gen1():
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + tt + b'\r\n\r\n')
 
+>>>>>>> f6840804f4660641badb8da76caec96f7070c7a6
 
 @app.route('/')
 @app.route('/start')
