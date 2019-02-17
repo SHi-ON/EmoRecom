@@ -227,7 +227,6 @@ def my_link():
 def getMAP():
     while not len(finalList) > 0:
         pass
-    print(finalList)
     return finalList
 
 def findSuggestion():
@@ -258,6 +257,7 @@ def makeSuggestList(em):
             l.append(makeMapArg((place.name,place.formatted_address,place.geo_location['lat'],place.geo_location['lng'])))
     except Exception as e: 
         print(e)
+
     return l
     
 
