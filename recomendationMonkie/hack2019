@@ -15,6 +15,8 @@ import numpy as np
 
 emo = {}
 emo['sad']= "bar"
+emo['disgust']= "bar"
+emo['scared']= "gym"
 emo['neutral']= "restaurant"
 emo['happy']= "gym"
 emo['angry']= "cinema"
@@ -69,11 +71,14 @@ sort_df = DF.from_dict(sorted(df[keyword].items(), key=operator.itemgetter(1), r
 sort_df.columns =['Name', 'Rating']
 sort_df['been'] = rand.randint(1,5,size = len(sort_df))
 maxi = pd.Series(data=[5.0]*len(sort_df))
-sort_df['Rating'] = maxi.combine((sort_df['Rating']-(rand.randint(-10,10,size = len(sort_df))/10)), min)
+mini = pd.Series(data=[0.0]*len(sort_df))
+sort_df['Rating'] = mini.combine(maxi.combine((sort_df['Rating']-(rand.randint(-10,10,size = len(sort_df))/10)), min),max)
 
  
 print("Historical Experience in "+keyword)
 print(sort_df.sort_values(by=['Rating'],ascending=False))
+
+sort_df.to_csv(keyword+'history.csv', index=False)
 
 
 loc_dover = "43.1953080,%20-70.8743810"#&opennow

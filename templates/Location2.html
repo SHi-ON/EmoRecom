@@ -1,0 +1,237 @@
+<html>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Montserrat">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+    body,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: "Montserrat", sans-serif;
+        color: white;
+    }
+
+    body {
+        background-color: black;
+    }
+
+    .w3-row-padding img {
+        margin-bottom: 12px
+    }
+
+    .bgimg {
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        min-height: 100%;
+    }
+
+    /* ============================================================= */
+    .center {
+        text-align: center;
+    }
+
+    .text {
+        font-size:30px;
+        margin:auto
+    }
+    .text1 {
+        font-size:30px;
+        margin:auto
+    }
+    .text2 {
+        font-size:30px;
+        margin:auto
+    }
+    .text3 {
+        font-size:30px;
+        margin:auto
+    }
+    .face {
+        /* display: block;
+            background: white;
+            border-radius: 50%;
+            height: 300px;
+            width: 300px;
+            margin: 0; */
+        display: inline-block;
+        background: yellow;
+        border-radius: 50%;
+        height: 300px;
+        width: 300px;
+        margin: 300 auto;
+        /* animation: rotate 2s infinite linear;  */
+
+    }
+    .back {
+        vertical-align:top;
+        float: left;
+        text-align: center;
+        width:50%;
+        height:50%;
+        background: url("static/faceinverse.png") no-repeat center center fixed; 
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+        background-color: #000000;
+    }
+    .back1 {
+        vertical-align:top;
+        float: right;
+        text-align: center;
+        width:50%;
+        height:50%;
+        background: url("static/faceinverse.png") no-repeat center center fixed; 
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+        background-color: #000000;
+    }
+    .back2 {
+        vertical-align:bottom;
+        float: left;
+        text-align: center;
+        width:50%;
+        height:50%;
+        background: url("static/faceinverse.png") no-repeat center center fixed; 
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+        background-color: #000000;
+    }
+    .back3 {
+        vertical-align:bottom;
+        float: right;
+        text-align: center;
+        width:50%;
+        height:50%;
+        background: url("static/faceinverse.png") no-repeat center center fixed; 
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+        background-color: #000000;
+    }
+    .innerback {
+        text-align: center;
+        width:100%;
+        height:100%;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+</style>
+    <body>
+        <script
+            src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <a href="camera"><div class="back"><div class="innerback"><p
+                        class="text"></p></div></div></a>
+        <a href="camera"><div class="back1"><div class="innerback"><p
+                        class="text1"></p></div></div></a>
+        <a href="camera"><div class="back2"><div class="innerback"><p
+                        class="text2"></p></div></div></a>
+        <a href="camera"><div class="back3"><div class="innerback"><p
+                        class="text3"></p></div></div></a>
+        <script>
+                $(function () {
+                    sayHi();
+                    function sayHi() {
+                        $.ajax({
+                            type: "GET",
+                            url: "locationNAME/1",
+                            success: function (data) {
+                                if (data.trim()) {
+                                $('.text').text("Are you in " + data + "?");
+                                }
+                            },
+                        });
+                        $.ajax({
+                            type: "GET",
+                            url: "locationURL/1",
+                            success: function (data) {
+                                if (data.trim()) {
+                                    $('.back').css('background-image', 'url(' + data + ')');
+                                }
+                                
+                            },
+                        });
+                        $.ajax({
+                            type: "GET",
+                            url: "locationNAME/2",
+                            success: function (data) {
+                                if (data.trim()) {
+                                $('.text1').text("Are you in " + data + "?");
+                                }
+                            },
+                        });
+                        $.ajax({
+                            type: "GET",
+                            url: "locationURL/2",
+                            success: function (data) {
+                                if (data.trim()) {
+                                    $('.back1').css('background-image', 'url(' + data + ')');
+                                }
+                                
+                            },
+                        });
+                        $.ajax({
+                            type: "GET",
+                            url: "locationNAME/3",
+                            success: function (data) {
+                                if (data.trim()) {
+                                $('.text2').text("Are you in " + data + "?");
+                                }
+                            },
+                        });
+                        $.ajax({
+                            type: "GET",
+                            url: "locationURL/3",
+                            success: function (data) {
+                                if (data.trim()) {
+                                    $('.back2').css('background-image', 'url(' + data + ')');
+                                }
+                                
+                            },
+                        });
+                        $.ajax({
+                            type: "GET",
+                            url: "locationNAME/4",
+                            success: function (data) {
+                                if (data.trim()) {
+                                $('.text3').text("Are you in " + data + "?");
+                                }
+                            },
+                        });
+                        $.ajax({
+                            type: "GET",
+                            url: "locationURL/4",
+                            success: function (data) {
+                                if (data.trim()) {
+                                    $('.back3').css('background-image', 'url(' + data + ')');
+                                }
+                                
+                            },
+                        });
+
+                    }
+                    
+                });
+        
+            </script>
+    </body>
+
+</html>
