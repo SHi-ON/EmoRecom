@@ -3,46 +3,73 @@
 
 <html>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Montserrat">
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css?family=Montserrat">
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+        <style>
+            body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif; color:white; background-color: black;text-align: center;}
+            .w3-row-padding img {margin-bottom: 12px}
+            .bgimg {
+              background-position: center;
+              background-repeat: no-repeat;
+              background-size: cover;
+              min-height: 100%;
+            }
+    
+            .centera {
+                display: inline-block;
+                border-radius: 50%;
+                height: 50%;
+                width:30%;
+                margin: 0 auto;
+            }
+            .centerb{
+                display: inline-block;
+            }
+        </style>
+    
+        <body>
+    
+            <h1>emo.</h1>
+          
+            <div class='parent'>
+                <img class=centera src="{{ url_for('video_feed')}}"> 
+            </div>
+            
+    
+            
 
-    <style>
-        body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif; color:white; background-color: black;text-align: center;}
-        .w3-row-padding img {margin-bottom: 12px}
-        .bgimg {
-          background-position: center;
-          background-repeat: no-repeat;
-          background-size: cover;
-          min-height: 100%;
-        }
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
-        .centera {
-            display: inline-block;
-            border-radius: 50%;
-            height: 50%;
-            width:30%;
-            margin: 0 auto;
-        }
-        .centerb{
-            display: inline-block;
-        }
-    </style>
 
-    <body>
 
-        <h1>EmoRecom</h1>
-        <h1>Hi, {{ user.username }}!</h1>
-        <div class='parent'>
-            <img class=centera src="{{ url_for('video_feed')}}"> 
-        </div>
+            <h1 class="center" id="div2"><p class="text">Message</p></h1>
+            <script>
+                $(function () {
+                    sayHi();
+                  
         
+                    function sayHi() {
+                        setTimeout(sayHi, 4000);
+                        $.ajax({
+                            type: "GET",
+                            url: "message",
+                            success: function (data) {
+                                $('.text').text(data);
+                                $("#div2").fadeIn(1000);
+                                $("#div2").delay(2000).fadeOut(1000);
         
-        <h3> You look {{emotion.emo}} </h3>
+                            },
+                        });
+                    }
+                });
         
-    </body>
-</html>
+            </script>
+            
+        </body>
+    </html>
