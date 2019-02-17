@@ -1,14 +1,17 @@
 #!/usr/bin/python3
 # -*- coding: utf8 -*-
 
-from flask import Flask, render_template, Response
+from flask import *
 from keras.preprocessing.image import img_to_array
 import imutils
 import cv2
 from threading import Lock
 from keras.models import load_model
 import numpy as np
+from random import randint
+import datetime
 
+lock = Lock()
 
 
 # parameters for loading data and images
@@ -72,15 +75,16 @@ def gen():
             emotion_probability = np.max(preds)
             label = EMOTIONS[preds.argmax()]
             score = 0
-            for (i, (emotion, prob)) in enumerate(zip(EMOTIONS, preds)):
+            for (i, (ee, prob)) in enumerate(zip(EMOTIONS, preds)):
                 # construct the label text
-                text = "{}: {:.2f}%".format(emotion, prob * 100)
+                text = "{}: {:.2f}%".format(ee, prob * 100)
                 # probability of classes of emotion
                 
                 w = int(prob * 300)
                 if w > score:
                     score = w
-                    large = emotion
+                    large = ee
+                    
 
                 cv2.rectangle(scoreboard, (7, (i * 35) + 5),
                                 (w, (i * 35) + 35), (0, 0, 255), -1)
@@ -91,6 +95,9 @@ def gen():
                                 (0, 0, 255), 2)
                 cv2.putText(camera_frame, label, (fX, fY - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+            lock.acquire()
+            emotion['emo'] = str(large)
+            lock.release()
 
         # cv2.imshow('Face Cam', camera_frame)
         # cv2.imshow("Likelihoods", scoreboard)
@@ -126,6 +133,33 @@ def camera():
 def index():
     return render_template('index.html', title='Home', user=user, posts=posts, emotion=emotion)
 
+
+@app.route('/message', methods = ['GET'])
+def message():
+    lock.acquire()
+    em = emotion['emo']
+    lock.release()
+    message = 'You look ' + em
+    return message
+
+# last_i = -1
+# @app.route('/message', methods = ['GET'])
+# def message():
+#     global last_i
+#     print ("DDDDDDD")
+#     message = 'Hi ' + user['username'] + '!'
+#     i = randint(0, 4)
+#     while (i == last_i):
+#         i = randint(0, 4)
+#     last_i = i
+#     if i == 1:
+#         message = 'You look ' + emotion['emo']
+#     if i == 2:
+#         currentDT = datetime.datetime.now()
+#         message = 'It is now ' + currentDT.strftime("%I:%M:%S %p")
+#     if i == 3:
+#         message = 'Chao you are so handsome!'
+#     return message
 
 
 
