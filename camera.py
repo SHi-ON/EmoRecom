@@ -13,7 +13,7 @@ emotion_model_path = 'static/models/_mini_XCEPTION.106-0.65.hdf5'
 # loading models
 face_detection = cv2.CascadeClassifier(detection_model_path)
 emotion_classifier = load_model(emotion_model_path, compile=False)
-emotion_classifier._make_predict_function()
+
 EMOTIONS = ["angry", "disgust", "scared", "happy", "sad", "surprised",
             "neutral"]
 
