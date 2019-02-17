@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <style>
-                body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif}
+                body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif; color:white;background-color: black}
                 .w3-row-padding img {margin-bottom: 12px}
                 .bgimg {
                   background-position: center;
@@ -15,22 +15,45 @@
                   background-size: cover;
                   min-height: 100%;
                 }
+
+                .centera {
+                    display: inline-block;
+                    /*border-radius: 50%;
+                    height: 70%;
+                    width:50%;
+                    margin: 0 auto;*/
+                    width: 500px;
+                    height: 500px;
+                    -moz-border-radius: 50%; 
+                    -webkit-border-radius: 50%; 
+                    border-radius: 50%;
+                }
+                .centerb{
+                    display: inline-block;
+                }
+                .centerc {
+                    display: inline-block;
+                    height: 65px;
+                    width: 65px;
+                    
+                }
                 </style>
         
                 <body>
                     
-                    <h1>EmoRecom</h1>
+                        <div class='parent'>
+                                <h1 class=centerb>EmoRecom</h1><img class=centerc
+                                    src="static/faceinverse.png">
+                            </div>
         
         
-                    <h1>Hi, {{ user.username }}!</h1>
-                    <h3> You look {{emotion.emo}} </h3>
-                    {% for post in posts %}
-                    <div><p>{{ post.author.username }} says: <b>{{ post.body }}</b></p></div>
-                    {% endfor %}
+                    <h1>Hi, {{ user.username }}, You look Happy !!!</h1>
+                    <h1><b>We Recommend You To</b></h1>>
+                    
         
                     <a href="/my-link/">Click me</a>
                     
-                    <div id="googleMap" style="width:100%;height:400px;"></div>
+                    <div id="googleMap" style="width:100%;height:680px;"></div>
         
                     <script src="{{ url_for('static', filename = 'map.js') }}"></script>
         
