@@ -9,7 +9,7 @@ from threading import Lock
 from keras.models import load_model
 import numpy as np
 
-from recom import *
+
 
 # parameters for loading data and images
 detection_model_path = 'models/haarcascade_frontalface_default.xml'
@@ -47,7 +47,6 @@ scorerun = True
 def gen():
     global scoreboardframe
     global scorerun
-    last_emo = ''
     while True:
         frame = camera1.read()[1]
         # reading the frame
@@ -76,7 +75,6 @@ def gen():
             label = EMOTIONS[preds.argmax()]
 
             for (i, (emotion, prob)) in enumerate(zip(EMOTIONS, preds)):
-                last_emo = emotion
                 # construct the label text
                 text = "{}: {:.2f}%".format(emotion, prob * 100)
                 # probability of classes of emotion
@@ -97,10 +95,9 @@ def gen():
             break
         tt = cv2.imencode('.jpg', camera_frame)[1].tobytes()
 
+
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + tt + b'\r\n\r\n')
-
-    final_emotion(last_emo)
 
     camera.release()
     cv2.destroyAllWindows()
@@ -128,10 +125,16 @@ def index():
 
 
 
+
+
+
 @app.route('/my-link/')
 def my_link():
   print('I got clicked!')
   return 'Click.'
+
+
+
 
 if __name__ == '__main__':
   app.run(debug=True)
