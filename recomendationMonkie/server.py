@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf8 -*-
 
+from pathlib import Path
+
 from flask import Flask, render_template, Response
 from keras.preprocessing.image import img_to_array
 import imutils
@@ -11,8 +13,9 @@ import numpy as np
 from recom import *
 
 # parameters for loading data and images
-detection_model_path = 'models/haarcascade_frontalface_default.xml'
-emotion_model_path = 'models/_mini_XCEPTION.106-0.65.hdf5'
+_BASE_DIR = Path(__file__).resolve().parents[1]
+detection_model_path = str(_BASE_DIR / 'models' / 'face_hyperparams.xml')
+emotion_model_path = str(_BASE_DIR / 'models' / 'Xception_mini106.hdf5')
 
 # hyper-parameters for bounding boxes shape
 # loading models

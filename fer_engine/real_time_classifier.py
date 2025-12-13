@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from keras.preprocessing.image import img_to_array
 import imutils
 import cv2
@@ -5,8 +7,9 @@ from keras.models import load_model
 import numpy as np
 
 # parameters for loading data and images
-detection_model_path = 'models/face_hyperparams.xml'
-emotion_model_path = 'models/Xception_mini106.hdf5'
+_BASE_DIR = Path(__file__).resolve().parent
+detection_model_path = str(_BASE_DIR.parent / 'models' / 'face_hyperparams.xml')
+emotion_model_path = str(_BASE_DIR / 'models' / '_mini_XCEPTION.106-0.65.hdf5')
 
 # hyper-parameters for bounding boxes shape
 # loading models

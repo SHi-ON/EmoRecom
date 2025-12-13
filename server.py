@@ -136,7 +136,6 @@ def gen():
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + tt + b'\r\n\r\n')
 
-
 def gen1():
     while scorerun:
         pass
@@ -146,7 +145,6 @@ def gen1():
         lock1.release()
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + tt + b'\r\n\r\n')
-
 @app.route('/')
 @app.route('/start')
 def stanford_page():
