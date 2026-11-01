@@ -8,6 +8,7 @@ from keras.models import load_model
 from random import randint
 from threading import Lock
 from flask import *
+import os
 import numpy as np
 import subprocess
 import googlemaps
@@ -25,8 +26,11 @@ import recom
 detection_model_path = 'models/face_hyperparams.xml'
 emotion_model_path = 'models/Xception_mini106.hdf5'
 
-APIKEY = "AIzaSyAYkThdY9kCPUIEyOMsus2TINTn6mT2ROg"
-google_places = GooglePlaces(APIKEY)
+def get_google_places():
+    key = os.environ.get("GOOGLE_PLACES_API_KEY", "").strip()
+    if not key:
+        raise RuntimeError("GOOGLE_PLACES_API_KEY is required for recommendations")
+    return GooglePlaces(key)
 lock = Lock()
 lock1 = Lock()
 
@@ -165,7 +169,7 @@ def video_feed1():
 def map():
     thread1 = threading.Thread(target=findSuggestion)
     thread1.start()
-    return render_template('map.html', title='Home', user=user, posts=posts, emotion=emotion )
+    return render_template('map.html', title='Home', user=user, posts=posts, emotion=emotion, maps_browser_key=os.environ.get('GOOGLE_MAPS_BROWSER_KEY', ''))
 
 @app.route('/camera') 
 def camera():
@@ -244,7 +248,7 @@ def makeSuggestList(em):
     if(not find):
         find = 'gym'
 
-    query_result = google_places.nearby_search(
+    query_result = get_google_places().nearby_search(
          lat_lng = Lat_LNG,radius=10000,keyword = str(find))
     l = []
     print (find,len(query_result.places),Lat_LNG)
@@ -260,7 +264,7 @@ def makeSuggestList(em):
 
 def findPlace(Lat_LNG, RADIUS=50):
     # Lat_LNG=MakeLatLNG((43.1351,-70.9293))
-    query_result = google_places.nearby_search(
+    query_result = get_google_places().nearby_search(
          lat_lng = Lat_LNG,radius=RADIUS)
 
     try:
@@ -304,7 +308,7 @@ def findLocation():
 if __name__ == '__main__':
     thread1 = threading.Thread(target=findLocation)
     thread1.start()
-    app.run(debug=True)
+    app.run(host='127.0.0.1', port=5000, debug=False, use_reloader=False)
     thread1.join()
     camera1.release()
     cv2.destroyAllWindows()
