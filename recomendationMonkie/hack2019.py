@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+import os
 # -*- coding: utf-8 -*-
 """
 Created on Sat Feb 16 20:24:16 2019
@@ -9,7 +9,7 @@ import operator
 import pandas as pd
 from pandas import DataFrame as DF
 import json
-import urllib2
+import urllib.request
 import numpy.random as rand
 import numpy as np
 
@@ -51,9 +51,9 @@ def runsuggest(emotion,Lat_LNG):
     keyword=emo[u_in]
     opennow=True
     rankby="prominence"# distance#&opennow
-    apiurl = google_nearby_Search+"location="+location+"&radius="+radius+"&keyword="+keyword+"&rankby="+rankby+"&key=PLACEHOLDER_REMOVED"
+    apiurl = google_nearby_Search+"location="+location+"&radius="+radius+"&keyword="+keyword+"&rankby="+rankby+"&key="+os.environ["GOOGLE_PLACES_API_KEY"]+""
     
-    with urllib.request.urlopen(apiurl) as url:
+    with urllib.request.urlopen(apiurl, timeout=10) as url:
 
         data = json.loads(url.read().decode())
     
@@ -84,8 +84,8 @@ def runsuggest(emotion,Lat_LNG):
     
     
     loc_dover = "43.1953080,%20-70.8743810"#&opennow
-    dover_url = google_nearby_Search+"location="+loc_dover+"&radius="+radius+"&keyword="+keyword+"&rankby="+rankby+"&key=PLACEHOLDER_REMOVED"
-    with urllib.request.urlopen(dover_url) as url:
+    dover_url = google_nearby_Search+"location="+loc_dover+"&radius="+radius+"&keyword="+keyword+"&rankby="+rankby+"&key="+os.environ["GOOGLE_PLACES_API_KEY"]+""
+    with urllib.request.urlopen(dover_url, timeout=10) as url:
         data2 = json.loads(url.read().decode())
     
     data2 = data2['results']
