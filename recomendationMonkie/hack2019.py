@@ -51,7 +51,7 @@ def runsuggest(emotion,Lat_LNG):
     keyword=emo[u_in]
     opennow=True
     rankby="prominence"# distance#&opennow
-    apiurl = google_nearby_Search+"location="+location+"&radius="+radius+"&keyword="+keyword+"&rankby="+rankby+"&key=AIzaSyAtTESyXpOa9WuicoLMGWpWkebGbIIBFfs"
+    apiurl = google_nearby_Search+"location="+location+"&radius="+radius+"&keyword="+keyword+"&rankby="+rankby+"&key=PLACEHOLDER_REMOVED"
     
     with urllib.request.urlopen(apiurl) as url:
 
@@ -84,7 +84,7 @@ def runsuggest(emotion,Lat_LNG):
     
     
     loc_dover = "43.1953080,%20-70.8743810"#&opennow
-    dover_url = google_nearby_Search+"location="+loc_dover+"&radius="+radius+"&keyword="+keyword+"&rankby="+rankby+"&key=AIzaSyAtTESyXpOa9WuicoLMGWpWkebGbIIBFfs"
+    dover_url = google_nearby_Search+"location="+loc_dover+"&radius="+radius+"&keyword="+keyword+"&rankby="+rankby+"&key=PLACEHOLDER_REMOVED"
     with urllib.request.urlopen(dover_url) as url:
         data2 = json.loads(url.read().decode())
     
