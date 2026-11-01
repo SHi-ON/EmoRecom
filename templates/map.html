@@ -59,7 +59,7 @@
         
                     
                 
-                    {% if maps_browser_key %}<script src="https://maps.googleapis.com/maps/api/js?key={{ maps_browser_key | urlencode }}&callback=myMap"></script>{% endif %}
+                    {% if maps_browser_key %}<script src="https://maps.googleapis.com/maps/api/js?key={{ maps_browser_key | urlencode }}"></script>{% endif %}
         
                     <button type="button" onclick="getUserLocation(this)" name="enable">Enable</button>
         
