@@ -196,11 +196,25 @@ def video_feed1():
 def map():
     if not os.environ.get('GOOGLE_PLACES_API_KEY') or not os.environ.get('GOOGLE_MAPS_BROWSER_KEY'):
         abort(503, description='Google Maps/Places configuration is missing')
-    if not Lat_LNG:
-        abort(503, description='Location is not configured')
-    thread1 = threading.Thread(target=findSuggestion, daemon=True)
-    thread1.start()
-    return render_template('map.html', title='Home', user=user, posts=posts, emotion=emotion, maps_browser_key=os.environ.get('GOOGLE_MAPS_BROWSER_KEY', ''))
+    return render_template('map.html', title='Home', user=user, posts=posts,
+                           emotion=emotion, maps_browser_key=os.environ['GOOGLE_MAPS_BROWSER_KEY'])
+
+@app.route('/recommendations', methods=['POST'])
+def recommendations():
+    if not request.is_json:
+        abort(415)
+    payload = request.get_json(silent=True) or {}
+    try:
+        lat = float(payload['lat'])
+        lng = float(payload['lng'])
+    except (KeyError, TypeError, ValueError):
+        abort(400, description='Valid latitude/longitude required')
+    if not (-90 <= lat <= 90 and -180 <= lng <= 180):
+        abort(400, description='Latitude/longitude out of bounds')
+    with lock:
+        current_emotion = emotion['emo'].lower()
+    results = makeSuggestList(current_emotion, MakeLatLNG((lat, lng)))
+    return jsonify(results)
 
 @app.route('/camera') 
 def camera():
@@ -268,7 +282,7 @@ def findSuggestion():
     finalList = makeSuggestList(large)
     # print (json.dumps(finalList))
 
-def makeSuggestList(em):
+def makeSuggestList(em, location=None):
     aa = {}
     aa['sad']= "bar"
     aa['disgust']= "bar"
@@ -282,7 +296,7 @@ def makeSuggestList(em):
         find = 'gym'
 
     query_result = get_google_places().nearby_search(
-         lat_lng = Lat_LNG,radius=10000,keyword = str(find))
+         lat_lng = location if location is not None else Lat_LNG,radius=10000,keyword = str(find))
     l = []
     print (find,len(query_result.places),Lat_LNG)
     try:
@@ -332,16 +346,11 @@ def MakeLatLNG(LOCATION):
 
 def findLocation():
     global Lat_LNG
-    raise RuntimeError('Automatic whereami location probing is disabled; provide an explicit consent-based location source')
-    temp = []
-    Lat_LNG = MakeLatLNG((temp[1],temp[3]))
-    print (Lat_LNG)
-    findPlace(Lat_LNG)
+    raise RuntimeError('Automatic location probing is disabled. Use browser consent.')
 
 
 if __name__ == '__main__':
-    # No implicit device location probing. Configure location explicitly in future.
-    # Browser geolocation requires an explicit user gesture and consent.
+    # Browser location is requested only after explicit user interaction.
     app.run(host='127.0.0.1', port=5000, debug=False, use_reloader=False)
     if camera1 is not None:
         camera1.release()
