@@ -447,3 +447,11 @@ fabric.properties
 /fer_engine/image_classifier.py
 /fer_engine/test/
 /fer_engine/test_output/
+
+# Secrets
+.env.*
+!.env.example
+*.pem
+*.key
+*credentials*.json
+*service-account*.json
