@@ -2,11 +2,12 @@
 # -*- coding: utf8 -*-
 
 
-from keras.preprocessing.image import img_to_array
+from tensorflow.keras.utils import img_to_array
 from googleplaces import GooglePlaces, types, lang
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 from random import randint
 from threading import Lock
+import time
 from flask import *
 import os
 import numpy as np
@@ -37,14 +38,36 @@ lock1 = Lock()
 
 # hyper-parameters for bounding boxes shape
 # loading models
-face_detection = cv2.CascadeClassifier(detection_model_path)
-emotion_classifier = load_model(emotion_model_path, compile=False)
-emotion_classifier._make_predict_function()
+face_detection = None
+emotion_classifier = None
+camera1 = None
+camera_lock = Lock()
+
+def initialize_camera():
+    global face_detection, emotion_classifier, camera1
+    with camera_lock:
+        if camera1 is not None:
+            return
+        if not os.path.isfile(detection_model_path) or not os.path.isfile(emotion_model_path):
+            raise RuntimeError("Real face detection and emotion model files are required")
+        detector = cv2.CascadeClassifier(detection_model_path)
+        if detector.empty():
+            raise RuntimeError("Invalid face detection model")
+        classifier = load_model(emotion_model_path, compile=False)
+        camera = cv2.VideoCapture(int(os.environ.get("CAMERA_INDEX", "0")))
+        if not camera.isOpened():
+            camera.release()
+            raise RuntimeError("Cannot open webcam")
+        face_detection, emotion_classifier, camera1 = detector, classifier, camera
 EMOTIONS = ["angry", "disgust", "scared", "happy", "sad", "surprised",
             "neutral"]
-camera1 = cv2.VideoCapture(0)
-
 app = Flask(__name__)
+
+@app.before_request
+def local_only():
+    # This legacy webcam application is local-only until proper user auth is added.
+    if request.remote_addr not in ('127.0.0.1', '::1'):
+        abort(403)
 
 
 user = {'username': 'Monkie'}
@@ -73,8 +96,11 @@ def gen():
     global scoreboardframe
     global scorerun
     global large
+    initialize_camera()
     while True:
-        frame = camera1.read()[1]
+        ok, frame = camera1.read()
+        if not ok:
+            break
         # reading the frame
         frame = imutils.resize(frame, width=400)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -142,13 +168,14 @@ def gen():
 
 def gen1():
     while scorerun:
-        pass
+        time.sleep(0.05)
     while True:
         lock1.acquire()
         tt = scoreboardframe
         lock1.release()
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + tt + b'\r\n\r\n')
+        time.sleep(0.1)
 @app.route('/')
 @app.route('/start')
 def stanford_page():
@@ -167,7 +194,11 @@ def video_feed1():
 
 @app.route('/map')
 def map():
-    thread1 = threading.Thread(target=findSuggestion)
+    if not os.environ.get('GOOGLE_PLACES_API_KEY') or not os.environ.get('GOOGLE_MAPS_BROWSER_KEY'):
+        abort(503, description='Google Maps/Places configuration is missing')
+    if not Lat_LNG:
+        abort(503, description='Location is not configured')
+    thread1 = threading.Thread(target=findSuggestion, daemon=True)
     thread1.start()
     return render_template('map.html', title='Home', user=user, posts=posts, emotion=emotion, maps_browser_key=os.environ.get('GOOGLE_MAPS_BROWSER_KEY', ''))
 
@@ -203,6 +234,8 @@ def message():
 @app.route('/locationNAME/<field1>', methods = ['GET'])
 def locationNAME(field1):
     index = int(field1)
+    if index < 0 or index >= len(places):
+        abort(404)
     if len(places) > 0:
         return places[index].name
     print ("ERROR URL")
@@ -212,6 +245,8 @@ def locationNAME(field1):
 @app.route('/locationURL/<field1>', methods = ['GET'])
 def locationURL(field1):
     index = int(field1)
+    if index < 0 or index >= len(places):
+        abort(404)
     if len(places) > 0 and len(places[index].photos) > 0:
         photo = places[index].photos[0]
         photo.get(maxheight=500, maxwidth=500)
@@ -226,9 +261,7 @@ def my_link():
 
 @app.route('/getMAP', methods = ['GET'])
 def getMAP():
-    while not len(finalList) > 0:
-        pass
-    return finalList
+    return jsonify(finalList)
 
 def findSuggestion():
     global finalList
@@ -244,7 +277,7 @@ def makeSuggestList(em):
     aa['happy']= "gym"
     aa['angry']= "cinema"
     aa['surprised']= "store"
-    find = aa[em]
+    find = aa.get(em, 'gym')
     if(not find):
         find = 'gym'
 
@@ -299,16 +332,17 @@ def MakeLatLNG(LOCATION):
 
 def findLocation():
     global Lat_LNG
-    temp = subprocess.Popen(["./whereami", ""], stdout=subprocess.PIPE).communicate()[0].split()
+    raise RuntimeError('Automatic whereami location probing is disabled; provide an explicit consent-based location source')
+    temp = []
     Lat_LNG = MakeLatLNG((temp[1],temp[3]))
     print (Lat_LNG)
     findPlace(Lat_LNG)
 
 
 if __name__ == '__main__':
-    thread1 = threading.Thread(target=findLocation)
-    thread1.start()
+    # No implicit device location probing. Configure location explicitly in future.
+    # Browser geolocation requires an explicit user gesture and consent.
     app.run(host='127.0.0.1', port=5000, debug=False, use_reloader=False)
-    thread1.join()
-    camera1.release()
+    if camera1 is not None:
+        camera1.release()
     cv2.destroyAllWindows()
