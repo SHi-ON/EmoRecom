@@ -61,7 +61,7 @@
                             getUserLocation();
                         }, 1000);  </script>
                 
-                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtTESyXpOa9WuicoLMGWpWkebGbIIBFfs&callback=myMap"></script>
+                    <script src="https://maps.googleapis.com/maps/api/js?key={{ maps_browser_key | urlencode }}&callback=myMap"></script>
         
                     <button type="button" onclick="getUserLocation(this)" name="enable">Enable</button>
         
