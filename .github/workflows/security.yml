@@ -1,0 +1,22 @@
+name: Security checks
+on:
+  push:
+  pull_request:
+jobs:
+  secret-and-static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan repository history for credentials
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Compile Python sources
+        run: python -m compileall -q server.py simpserver.py recomendationMonkie
+      - name: Check forbidden defaults
+        run: |
+          if grep -RnE 'debug=True|AIzaSy[A-Za-z0-9_-]{20,}' --include='*.py' --include='*.html' --include='*.js' . --exclude-dir=.git; then
+            echo "Hardcoded key or debug enabled"; exit 1
+          fi
