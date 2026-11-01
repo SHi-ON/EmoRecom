@@ -57,11 +57,9 @@
         
                     <script src="{{ url_for('static', filename = 'map.js') }}"></script>
         
-                    <script> setTimeout(function () {
-                            getUserLocation();
-                        }, 1000);  </script>
+                    
                 
-                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtTESyXpOa9WuicoLMGWpWkebGbIIBFfs&callback=myMap"></script>
+                    {% if maps_browser_key %}<script src="https://maps.googleapis.com/maps/api/js?key={{ maps_browser_key | urlencode }}"></script>{% endif %}
         
                     <button type="button" onclick="getUserLocation(this)" name="enable">Enable</button>
         

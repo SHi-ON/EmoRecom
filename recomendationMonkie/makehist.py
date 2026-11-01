@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+import os
 # -*- coding: utf-8 -*-
 """
 Created on Sun Feb 17 02:19:44 2019
@@ -39,13 +39,13 @@ for i in emo:
     keyword=emo[i]
     opennow=True
     rankby="prominence"# distance#&opennow
-    apiurl = google_nearby_Search+"location="+location+"&radius="+radius+"&keyword="+keyword+"&rankby="+rankby+"&key=AIzaSyAtTESyXpOa9WuicoLMGWpWkebGbIIBFfs"
+    apiurl = google_nearby_Search+"location="+location+"&radius="+radius+"&keyword="+keyword+"&rankby="+rankby+"&key="+os.environ["GOOGLE_PLACES_API_KEY"]+""
     
     
     
     
     
-    with urllib.request.urlopen(apiurl) as url:
+    with urllib.request.urlopen(apiurl, timeout=10) as url:
         data = json.loads(url.read().decode())
     
     data = data['results']

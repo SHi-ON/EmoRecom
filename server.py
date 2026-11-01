@@ -2,12 +2,14 @@
 # -*- coding: utf8 -*-
 
 
-from keras.preprocessing.image import img_to_array
+from tensorflow.keras.utils import img_to_array
 from googleplaces import GooglePlaces, types, lang
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 from random import randint
 from threading import Lock
+import time
 from flask import *
+import os
 import numpy as np
 import subprocess
 import googlemaps
@@ -25,22 +27,47 @@ import recom
 detection_model_path = 'models/face_hyperparams.xml'
 emotion_model_path = 'models/Xception_mini106.hdf5'
 
-APIKEY = "AIzaSyAYkThdY9kCPUIEyOMsus2TINTn6mT2ROg"
-google_places = GooglePlaces(APIKEY)
+def get_google_places():
+    key = os.environ.get("GOOGLE_PLACES_API_KEY", "").strip()
+    if not key:
+        raise RuntimeError("GOOGLE_PLACES_API_KEY is required for recommendations")
+    return GooglePlaces(key)
 lock = Lock()
 lock1 = Lock()
 
 
 # hyper-parameters for bounding boxes shape
 # loading models
-face_detection = cv2.CascadeClassifier(detection_model_path)
-emotion_classifier = load_model(emotion_model_path, compile=False)
-emotion_classifier._make_predict_function()
+face_detection = None
+emotion_classifier = None
+camera1 = None
+camera_lock = Lock()
+
+def initialize_camera():
+    global face_detection, emotion_classifier, camera1
+    with camera_lock:
+        if camera1 is not None:
+            return
+        if not os.path.isfile(detection_model_path) or not os.path.isfile(emotion_model_path):
+            raise RuntimeError("Real face detection and emotion model files are required")
+        detector = cv2.CascadeClassifier(detection_model_path)
+        if detector.empty():
+            raise RuntimeError("Invalid face detection model")
+        classifier = load_model(emotion_model_path, compile=False)
+        camera = cv2.VideoCapture(int(os.environ.get("CAMERA_INDEX", "0")))
+        if not camera.isOpened():
+            camera.release()
+            raise RuntimeError("Cannot open webcam")
+        face_detection, emotion_classifier, camera1 = detector, classifier, camera
 EMOTIONS = ["angry", "disgust", "scared", "happy", "sad", "surprised",
             "neutral"]
-camera1 = cv2.VideoCapture(0)
-
 app = Flask(__name__)
+
+@app.before_request
+def local_only():
+    # This legacy webcam application is local-only until proper user auth is added.
+    if request.remote_addr not in ('127.0.0.1', '::1'):
+        abort(403)
 
 
 user = {'username': 'Monkie'}
@@ -69,8 +96,11 @@ def gen():
     global scoreboardframe
     global scorerun
     global large
+    initialize_camera()
     while True:
-        frame = camera1.read()[1]
+        ok, frame = camera1.read()
+        if not ok:
+            break
         # reading the frame
         frame = imutils.resize(frame, width=400)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -138,13 +168,14 @@ def gen():
 
 def gen1():
     while scorerun:
-        pass
+        time.sleep(0.05)
     while True:
         lock1.acquire()
         tt = scoreboardframe
         lock1.release()
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + tt + b'\r\n\r\n')
+        time.sleep(0.1)
 @app.route('/')
 @app.route('/start')
 def stanford_page():
@@ -163,9 +194,27 @@ def video_feed1():
 
 @app.route('/map')
 def map():
-    thread1 = threading.Thread(target=findSuggestion)
-    thread1.start()
-    return render_template('map.html', title='Home', user=user, posts=posts, emotion=emotion )
+    if not os.environ.get('GOOGLE_PLACES_API_KEY') or not os.environ.get('GOOGLE_MAPS_BROWSER_KEY'):
+        abort(503, description='Google Maps/Places configuration is missing')
+    return render_template('map.html', title='Home', user=user, posts=posts,
+                           emotion=emotion, maps_browser_key=os.environ['GOOGLE_MAPS_BROWSER_KEY'])
+
+@app.route('/recommendations', methods=['POST'])
+def recommendations():
+    if not request.is_json:
+        abort(415)
+    payload = request.get_json(silent=True) or {}
+    try:
+        lat = float(payload['lat'])
+        lng = float(payload['lng'])
+    except (KeyError, TypeError, ValueError):
+        abort(400, description='Valid latitude/longitude required')
+    if not (-90 <= lat <= 90 and -180 <= lng <= 180):
+        abort(400, description='Latitude/longitude out of bounds')
+    with lock:
+        current_emotion = emotion['emo'].lower()
+    results = makeSuggestList(current_emotion, MakeLatLNG((lat, lng)))
+    return jsonify(results)
 
 @app.route('/camera') 
 def camera():
@@ -199,6 +248,8 @@ def message():
 @app.route('/locationNAME/<field1>', methods = ['GET'])
 def locationNAME(field1):
     index = int(field1)
+    if index < 0 or index >= len(places):
+        abort(404)
     if len(places) > 0:
         return places[index].name
     print ("ERROR URL")
@@ -208,6 +259,8 @@ def locationNAME(field1):
 @app.route('/locationURL/<field1>', methods = ['GET'])
 def locationURL(field1):
     index = int(field1)
+    if index < 0 or index >= len(places):
+        abort(404)
     if len(places) > 0 and len(places[index].photos) > 0:
         photo = places[index].photos[0]
         photo.get(maxheight=500, maxwidth=500)
@@ -222,16 +275,14 @@ def my_link():
 
 @app.route('/getMAP', methods = ['GET'])
 def getMAP():
-    while not len(finalList) > 0:
-        pass
-    return finalList
+    return jsonify(finalList)
 
 def findSuggestion():
     global finalList
     finalList = makeSuggestList(large)
     # print (json.dumps(finalList))
 
-def makeSuggestList(em):
+def makeSuggestList(em, location=None):
     aa = {}
     aa['sad']= "bar"
     aa['disgust']= "bar"
@@ -240,12 +291,12 @@ def makeSuggestList(em):
     aa['happy']= "gym"
     aa['angry']= "cinema"
     aa['surprised']= "store"
-    find = aa[em]
+    find = aa.get(em, 'gym')
     if(not find):
         find = 'gym'
 
-    query_result = google_places.nearby_search(
-         lat_lng = Lat_LNG,radius=10000,keyword = str(find))
+    query_result = get_google_places().nearby_search(
+         lat_lng = location if location is not None else Lat_LNG,radius=10000,keyword = str(find))
     l = []
     print (find,len(query_result.places),Lat_LNG)
     try:
@@ -260,7 +311,7 @@ def makeSuggestList(em):
 
 def findPlace(Lat_LNG, RADIUS=50):
     # Lat_LNG=MakeLatLNG((43.1351,-70.9293))
-    query_result = google_places.nearby_search(
+    query_result = get_google_places().nearby_search(
          lat_lng = Lat_LNG,radius=RADIUS)
 
     try:
@@ -295,16 +346,12 @@ def MakeLatLNG(LOCATION):
 
 def findLocation():
     global Lat_LNG
-    temp = subprocess.Popen(["./whereami", ""], stdout=subprocess.PIPE).communicate()[0].split()
-    Lat_LNG = MakeLatLNG((temp[1],temp[3]))
-    print (Lat_LNG)
-    findPlace(Lat_LNG)
+    raise RuntimeError('Automatic location probing is disabled. Use browser consent.')
 
 
 if __name__ == '__main__':
-    thread1 = threading.Thread(target=findLocation)
-    thread1.start()
-    app.run(debug=True)
-    thread1.join()
-    camera1.release()
+    # Browser location is requested only after explicit user interaction.
+    app.run(host='127.0.0.1', port=5000, debug=False, use_reloader=False)
+    if camera1 is not None:
+        camera1.release()
     cv2.destroyAllWindows()

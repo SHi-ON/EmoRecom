@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+import os
 # -*- coding: utf-8 -*-
 """
 Created on Sat Feb 16 20:24:16 2019
@@ -30,7 +30,7 @@ def autorev(keyword,rate_in,name):
     #keyword=input("")
     opennow=True
     rankby="prominence"# distance#&opennow
-    apiurl = google_nearby_Search+"location="+location+"&radius="+radius+"&keyword="+keyword+"&rankby="+rankby+"&key=AIzaSyAtTESyXpOa9WuicoLMGWpWkebGbIIBFfs"
+    apiurl = google_nearby_Search+"location="+location+"&radius="+radius+"&keyword="+keyword+"&rankby="+rankby+"&key="+os.environ["GOOGLE_PLACES_API_KEY"]+""
     '''
     try:
         rate_in = input("")
