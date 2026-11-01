@@ -30,7 +30,7 @@ def autorev(keyword,rate_in,name):
     #keyword=input("")
     opennow=True
     rankby="prominence"# distance#&opennow
-    apiurl = google_nearby_Search+"location="+location+"&radius="+radius+"&keyword="+keyword+"&rankby="+rankby+"&key=AIzaSyAtTESyXpOa9WuicoLMGWpWkebGbIIBFfs"
+    apiurl = google_nearby_Search+"location="+location+"&radius="+radius+"&keyword="+keyword+"&rankby="+rankby+"&key=PLACEHOLDER_REMOVED"
     '''
     try:
         rate_in = input("")
